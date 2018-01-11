@@ -9,8 +9,6 @@ const Q50 = Math.floor(Q/2);
 const Q25 = Math.floor(Q/4);
 const Q10 = Math.floor(Q/10);
 const Q20 = Math.floor(Q/5);
-const Q33 = Math.floor(Q/3);
-const Q66 = Math.floor((Q/3)*2);
 const Q75 = Math.floor((Q/4)*3);
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
@@ -23,18 +21,13 @@ const WEST  = 0b1000;
 const PLACE_COIN_CHANCE = 0.5;
 const JUMBLE_COIN_CHANCE = 0.8;
 
-let STROKE_COLOR = 'darkblue';
-const BACKGROUND_COLOR = 'lightblue';
-const INPROGRESS_COLOR = 'darkblue';
+// https://en.wikipedia.org/wiki/Web_colors
+const BACKGROUND_COLOR = 'powderblue';
+const INPROGRESS_COLOR = 'navy';
 const COMPLETED_COLOR = 'black';
 
 function main()
 {
-//  let ele = document.querySelector('div.gridoftiles');
-//  if ( ele )
-//      ele.parentNode.removeChild(ele);
-    
-    STROKE_COLOR = INPROGRESS_COLOR;
     const got = new GridOfTiles(
         Math.max(Math.floor(window.innerWidth / Q), 5),
         Math.max(Math.floor(window.innerHeight / Q), 5)
@@ -47,31 +40,28 @@ class SvgHelper
     constructor()
     {
         this.fun = [
-        this.empty,         // 0
-        this.singleN,       // 1
-        this.singleE,       // 2
-        this.curveNE,       // 3
-        this.singleS,       // 4
-        this.lineNS,        // 5
-        this.curveSE,       // 6
-        this.triNES,        // 7
-        this.singleW,       // 8
-        this.curveNW,       // 9
-        this.lineEW,        // 10
-        this.triNEW,        // 11
-        this.curveSW,       // 12
-        this.triNSW,        // 13
-        this.triEWS,        // 14
-        this.four           // 15
+        SvgHelper.empty,         // 0
+        SvgHelper.singleN,       // 1
+        SvgHelper.singleE,       // 2
+        SvgHelper.curveNE,       // 3
+        SvgHelper.singleS,       // 4
+        SvgHelper.lineNS,        // 5
+        SvgHelper.curveSE,       // 6
+        SvgHelper.triNES,        // 7
+        SvgHelper.singleW,       // 8
+        SvgHelper.curveNW,       // 9
+        SvgHelper.lineEW,        // 10
+        SvgHelper.triNEW,        // 11
+        SvgHelper.curveSW,       // 12
+        SvgHelper.triNSW,        // 13
+        SvgHelper.triEWS,        // 14
+        SvgHelper.four           // 15
         ];
     }
 
     static buildElement(eleName, attLst)
     {
         let ele = document.createElementNS(SVG_NAMESPACE, eleName);
-        ele.setAttributeNS(null, 'stroke', STROKE_COLOR);
-        ele.setAttributeNS(null, 'stroke-width', Q10);
-        ele.setAttributeNS(null, 'fill', 'none');
         // attLst is like { r: 25, cx: 0, cy: 100 }
         Object.keys(attLst).forEach((key) => 
                 ele.setAttributeNS(null, key, attLst[key])
@@ -79,102 +69,84 @@ class SvgHelper
         return ele;
     }
 
-/*    
-	flower(g)
-	{
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q33, cy:Q33, rx:Q20, ry:Q10, transform:`rotate(45 ${Q33} ${Q33})`}));
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q66, cy:Q66, rx:Q20, ry:Q10, transform:`rotate(45 ${Q66} ${Q66})`}));
-
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q33, cy:Q66, rx:Q20, ry:Q10, transform:`rotate(-45 ${Q33} ${Q66})`}));
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q66, cy:Q33, rx:Q20, ry:Q10, transform:`rotate(-45 ${Q66} ${Q33})`}));
-
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q50, cy:Q25, rx:Q10, ry:Q20}));
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q50, cy:Q75, rx:Q10, ry:Q20}));
-
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q25, cy:Q50, rx:Q20, ry:Q10})); 
-		g.appendChild(SvgHelper.buildElement("ellipse", {cx:Q75, cy:Q50, rx:Q20, ry:Q10}));
-
-		g.appendChild(SvgHelper.buildElement("circle", {r:Q10, cx:Q50, cy:Q50}));
-	}
-*/	
-    circle(g)
+    static circle(g)
     {
         g.appendChild(SvgHelper.buildElement("circle", {r:Q25, cx:Q50, cy:Q50}));
     }
     
-    empty(g)
+    static empty(g)
     {
     }   
-    singleN(g)
+    static singleN(g)
     {
-        this.circle(g);
+        SvgHelper.circle(g);
         g.appendChild(SvgHelper.buildElement("line", {x1:Q50, y1:0, x2:Q50, y2:Q25}));
     }
-    singleE(g)
+    static singleE(g)
     {
-        this.circle(g);
+        SvgHelper.circle(g);
         g.appendChild(SvgHelper.buildElement("line", {x1:Q, y1:Q50, x2:Q75, y2:Q50}));
     }
-    curveNE(g)
+    static curveNE(g)
     {
         g.appendChild(SvgHelper.buildElement("path", {d: `M${Q50},0 A${Q50},${Q50} 0 0 0 ${Q},${Q50}`}));   // SweepFlag 0 = anticlockwise
     }
-    singleS(g)
+    static singleS(g)
     {
-        this.circle(g);
+        SvgHelper.circle(g);
         g.appendChild(SvgHelper.buildElement("line", {x1:Q50, y1:Q, x2:Q50, y2:Q75}));
     }
-    lineNS(g)
+    static lineNS(g)
     {
         g.appendChild(SvgHelper.buildElement("line", {x1:Q50, y1:0, x2:Q50, y2:Q}));
     }
-    curveSE(g)
+    static curveSE(g)
     {
         g.appendChild(SvgHelper.buildElement("path", {d: `M${Q50},${Q} A${Q50},${Q50} 0 0 1 ${Q},${Q50}`}));    // SweepFlag 1 = clockwise
     }
-    triNES(g)
+    static triNES(g)
     {
-        this.curveNE(g);
-        this.curveSE(g);
+        SvgHelper.curveNE(g);
+        SvgHelper.curveSE(g);
     }
-    singleW(g)
+    static singleW(g)
     {
-        this.circle(g);
+        SvgHelper.circle(g);
         g.appendChild(SvgHelper.buildElement("line", {x1:0, y1:Q50, x2:Q25, y2:Q50}));
     }
-    curveNW(g)
+    static curveNW(g)
     {
         g.appendChild(SvgHelper.buildElement("path", {d: `M${Q50},0 A${Q50},${Q50} 0 0 1 0,${Q50}`}));  // SweepFlag 1 = clockwise
     }
-    lineEW(g)
+    static lineEW(g)
     {
         g.appendChild(SvgHelper.buildElement("line", {x1:0, y1:Q50, x2:Q, y2:Q50}));
     }
-    triNEW(g)
+    static triNEW(g)
     {
-        this.curveNE(g);
-        this.curveNW(g);
+        SvgHelper.curveNE(g);
+        SvgHelper.curveNW(g);
     }
-    curveSW(g)
+    static curveSW(g)
     {
         g.appendChild(SvgHelper.buildElement("path", {d: `M${Q50},${Q} A${Q50},${Q50} 0 0 0 0,${Q50}`}));   // SweepFlag 0 = anticlockwise
     }
-    triNSW(g)
+    static triNSW(g)
     {
-        this.curveNW(g);
-        this.curveSW(g);
+        SvgHelper.curveNW(g);
+        SvgHelper.curveSW(g);
     }
-    triEWS(g)
+    static triEWS(g)
     {
-        this.curveSW(g);
-        this.curveSE(g);
+        SvgHelper.curveSW(g);
+        SvgHelper.curveSE(g);
     }
-    four(g)
+    static four(g)
     {
-        this.curveNE(g);
-        this.curveSE(g);
-        this.curveSW(g);
-        this.curveNW(g);
+        SvgHelper.curveNE(g);
+        SvgHelper.curveSE(g);
+        SvgHelper.curveSW(g);
+        SvgHelper.curveNW(g);
     }
 }
 
@@ -185,112 +157,106 @@ function Tile()
     this.w = null;
     this.s = null;
 
-    this.news = 0;
+    this.coins = this.originalCoins = 0;
 
     this.div = null;
-    
-    this.hlp = new SvgHelper();
 }
 {
-    Tile.prototype.spinSVG = function(g)
+    Tile.prototype.spinSVG = function(degrees=90)
     {
-//      let t1 = window.performance.now();
-
-//      var handleOnend = function() {
-//          let t2 = window.performance.now(); 
-//          console.log(t2-t1);
-//      };
-        
-//      g.addEventListener('onend', handleOnend);
-        
+		const that = this;
         let angle = 15;
         
-        const tilt = function() {
+        const g = this.div.querySelector("use");
+		const tilt = function()
+		{
             g.setAttributeNS(null, 'transform', `rotate(${angle} ${Q50},${Q50})`);
             angle += 15;
-            if ( angle < 90 )
+            if ( angle < degrees )
                 window.requestAnimationFrame(tilt);
+			else
+				window.requestAnimationFrame(that.setGraphic.bind(that));
         };
         window.requestAnimationFrame(tilt);
     };
     
-    Tile.prototype.unspinSVG = function(g)
+    Tile.prototype.unspinSVG = function(degrees=90)
     {
+		const that = this;
         let angle = 15;
         
-        const tilt = function() {
+		const g = this.div.querySelector("use");
+        const tilt = function()
+		{
             g.setAttributeNS(null, 'transform', `rotate(-${angle} ${Q50},${Q50})`);
             angle += 15;
             if ( angle < 90 )
                 window.requestAnimationFrame(tilt);
+			else
+				window.requestAnimationFrame(that.setGraphic.bind(that));
         };
         window.requestAnimationFrame(tilt);
     };
 
     Tile.prototype.shiftBits = function()
     {
-        if ( this.news & 0b1000 )
-            this.news = ((this.news << 1) & 0b1111) | 0b0001;
+        if ( this.coins & 0b1000 )
+            this.coins = ((this.coins << 1) & 0b1111) | 0b0001;
         else
-            this.news = (this.news << 1) & 0b1111;
+            this.coins = (this.coins << 1) & 0b1111;
     };
 
     Tile.prototype.unshiftBits = function()
     {
-        if ( this.news & 0b0001 )
-            this.news = (this.news >> 1) | 0b1000;
+        if ( this.coins & 0b0001 )
+            this.coins = (this.coins >> 1) | 0b1000;
         else
-            this.news = this.news >> 1;
+            this.coins = this.coins >> 1;
     };
     
     Tile.prototype.rotate = function()
     {
-        if ( this.news === 0  )
+        if ( this.coins === 0  )
             return;
-        let g = this.div.querySelector("g");
-        if ( g )
-        {
-            this.spinSVG.bind(this)(g);
-            this.shiftBits();
-        }
+        this.spinSVG();
+        this.shiftBits();
     };
 
     Tile.prototype.unrotate = function()
     {
-        if ( this.news === 0  )
+        if ( this.coins === 0  )
             return;
-        let g = this.div.querySelector("g");
-        if ( g )
-        {
-            this.unspinSVG.bind(this)(g);
-            this.unshiftBits();
-        }
+        this.unspinSVG();
+        this.unshiftBits();
     };
 
     Tile.prototype.isTileComplete = function()
     {
-        let complete = true;
-        if (this.news & NORTH) {
-            if ((this.n === null) || !(this.n.news & SOUTH)) {
-                complete = false;
+        if (this.coins & NORTH) 
+		{
+            if ((this.n === null) || !(this.n.coins & SOUTH)) {
+                return false;
             }
         }
-        if (this.news & EAST) {
-            if ((this.e === null) || !(this.e.news & WEST)) {
-                complete = false;
+        if (this.coins & EAST) 
+		{
+            if ((this.e === null) || !(this.e.coins & WEST)) {
+                return false;
             }
         }
-        if (this.news & WEST) {
-            if ((this.w === null) || !(this.w.news & EAST)) {
-                complete = false;
+        if (this.coins & WEST) 
+		{
+            if ((this.w === null) || !(this.w.coins & EAST)) {
+                return false;
             }
         }
-        if (this.news & SOUTH) {
-            if ((this.s === null) || !(this.s.news & NORTH)) {
-                complete = false;
+        if (this.coins & SOUTH)
+		{
+            if ((this.s === null) || !(this.s.coins & NORTH)) {
+                return false;
             }
         }
-        return complete;
+        return true;
     };
 
     Tile.prototype.getRoot = function()
@@ -327,16 +293,16 @@ function Tile()
         {
             if ( Math.random() > PLACE_COIN_CHANCE )
             {
-                this.news = this.news | EAST;
-                this.e.news = this.e.news | WEST;
+                this.coins = this.coins | EAST;
+                this.e.coins = this.e.coins | WEST;
             }
         }
         if ( this.s )
         {
             if ( Math.random() > PLACE_COIN_CHANCE )
             {
-                this.news = this.news | SOUTH;
-                this.s.news = this.s.news | NORTH;
+                this.coins = this.coins | SOUTH;
+                this.s.coins = this.s.coins | NORTH;
             }
         }
     };
@@ -365,47 +331,59 @@ function Tile()
     Tile.prototype.handleEvent = function(event)
     {
         if ( event.type != "click" )
+		{
+			console.log(event);
             return;
+		}
         
-        if ( STROKE_COLOR == COMPLETED_COLOR )
-            return;
-        
-        if ( event.altKey || event.shiftKey || event.ctrlKey )
+        if ( this.isGridComplete() )
+			return;
+		
+		if ( event.altKey )
+		{
+			this.coins = this.originalCoins;
+			this.setGraphic();
+		}
+		else if ( event.shiftKey || event.ctrlKey )
             this.unrotate();
         else
             this.rotate();
         
-        // wait a bit to allow animation to complete then set new SVG
-        window.setTimeout(this.setGraphic.bind(this), 50);
-
         if ( this.isGridComplete() )
         {
             const it = this.createIterator();
-            STROKE_COLOR = COMPLETED_COLOR;
             window.setTimeout( () => {
                 for ( const t of it )
-                    t.setGraphic();
-            }, 0);
+					t.strokeItBlack(COMPLETED_COLOR);
+            }, 500);
         }
     };
+	
+	Tile.prototype.strokeItBlack = function(strokeColor=COMPLETED_COLOR)
+	{
+		const ele = this.div.querySelector("svg");
+		if ( ele )
+			ele.setAttributeNS(null, 'stroke', strokeColor);
+	};
     
     Tile.prototype.setGraphic = function()
     {
-        if ( 0 === this.news )
+        if ( 0 === this.coins )
             return;
         
         let svg = document.createElementNS(SVG_NAMESPACE, 'svg');
         svg.setAttributeNS(null, 'width', Q);
         svg.setAttributeNS(null, 'height', Q);
-        svg.addEventListener("click", this, false);
-        
-        let g = document.createElementNS(SVG_NAMESPACE, 'g');
-        svg.appendChild(g);
-        
-        // Without .bind(), calls the function with this == Array(16) because
-        // in a function call, ‘this’ is a reference to the object which made that call
-        this.hlp.fun[this.news].bind(this.hlp)(g);
-        
+		svg.setAttributeNS(null, 'stroke', INPROGRESS_COLOR);
+		svg.setAttributeNS(null, 'stroke-width', Q10);
+		svg.setAttributeNS(null, 'fill', 'none');
+		
+        this.div.addEventListener("click", this);
+
+		let u = document.createElementNS(SVG_NAMESPACE, 'use');
+		u.setAttributeNS(null, 'href', `#tile${this.coins}`);
+		svg.appendChild(u);
+		
         while ( this.div.lastChild )
             this.div.removeChild(this.div.lastChild);
         this.div.appendChild(svg);
@@ -473,15 +451,15 @@ function GridOfTiles(numX=7, numY=5)
                 x.placeCoin();
                 
                 // mirror the coin to the top right
-                if ( x.news & EAST )
+                if ( x.coins & EAST )
                 {
-                    x1.news |= WEST;
-                    x1.w.news |= EAST;
+                    x1.coins |= WEST;
+                    x1.w.coins |= EAST;
                 }
-                if ( x.news & SOUTH )
+                if ( x.coins & SOUTH )
                 {
-                    x1.news |= SOUTH;
-                    x1.s.news |= NORTH;
+                    x1.coins |= SOUTH;
+                    x1.s.coins |= NORTH;
                 }
                 x1 = x1.w;
             }
@@ -497,22 +475,22 @@ function GridOfTiles(numX=7, numY=5)
             let y1 = x; while ( y1.s ) y1 = y1.s;
             for ( let yCount=0, y=x; yCount < yHalf; yCount++, y=y.s )
             {
-                if ( y.news & EAST )
+                if ( y.coins & EAST )
                 {
-                    y1.news |= EAST;
-                    y1.e.news |= WEST;
+                    y1.coins |= EAST;
+                    y1.e.coins |= WEST;
                 }
-                if ( y.news & SOUTH )
+                if ( y.coins & SOUTH )
                 {
-                    y1.news |= NORTH;
-                    y1.n.news |= SOUTH;
+                    y1.coins |= NORTH;
+                    y1.n.coins |= SOUTH;
                 }
                 y1 = y1.n;
             }
             
             x1 = x1.w;
         }
-
+		
         return this;
     };
 
@@ -520,13 +498,36 @@ function GridOfTiles(numX=7, numY=5)
     {
         const it = this.createIterator();
         for ( const t of it )
+		{
+			t.originalCoins = t.coins;
             t.jumbleCoin();
+		}
         
         return this;
     };
 
     GridOfTiles.prototype.createHTML = function()
     {
+		const hlp = new SvgHelper();
+		
+		const eleSymbols = document.createElement("div");
+		eleSymbols.setAttribute('display', 'none');
+		for ( let i=0; i<hlp.fun.length; i++ )
+		{
+			const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+			svg.setAttributeNS(null, 'display', 'none');
+			eleSymbols.appendChild(svg);
+			
+			const sym = document.createElementNS(SVG_NAMESPACE, 'symbol');
+			sym.setAttributeNS(null, 'id', `tile${i}`);
+			svg.appendChild(sym);
+			
+			const g = document.createElementNS(SVG_NAMESPACE, 'g');
+			hlp.fun[i](g);
+			sym.appendChild(g);
+		}
+		document.body.appendChild(eleSymbols);
+
         // create a grid container; all direct children will become grid items
         const eleWrapper = document.createElement("div");
 //      eleWrapper.className = "gridoftiles";
@@ -536,7 +537,7 @@ function GridOfTiles(numX=7, numY=5)
         eleWrapper.style.gridTemplateRows = `${Q}px `.repeat(this.numY);        // can't use SVG repeat(5,100px)
         eleWrapper.style.gridTemplateColumns = `${Q}px `.repeat(this.numX);     // can't use SVG repeat(7,100px)
         eleWrapper.style.backgroundColor = BACKGROUND_COLOR;
-        eleWrapper.style.border = `${Q10}px solid ${STROKE_COLOR}`;
+        eleWrapper.style.border = `${Q10}px solid ${INPROGRESS_COLOR}`;
         eleWrapper.style.width = `${Q * this.numX}px`;
         eleWrapper.style.height = `${Q * this.numY}px`;
         
