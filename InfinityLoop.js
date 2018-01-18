@@ -1,14 +1,16 @@
 /*jshint esversion:6, unused:true, undef:true */
+// @ts-check
 
 "use strict";
 
-const DEBUGGING = 1;
+const DEBUGGING = 0;
 
 const Q = 100;
+const strQ = Q.toString();
 const Q50 = Math.floor(Q/2);
 const Q25 = Math.floor(Q/4);
 const Q10 = Math.floor(Q/10);
-const Q20 = Math.floor(Q/5);
+const strQ10 = Q10.toString();
 const Q75 = Math.floor((Q/4)*3);
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
@@ -164,36 +166,36 @@ function Tile()
 {
     Tile.prototype.spinSVG = function(degrees=90)
     {
-		const that = this;
+        const that = this;
         let angle = 15;
         
         const g = this.div.querySelector("use");
-		const tilt = function()
-		{
+        const tilt = function()
+        {
             g.setAttributeNS(null, 'transform', `rotate(${angle} ${Q50},${Q50})`);
             angle += 15;
             if ( angle < degrees )
                 window.requestAnimationFrame(tilt);
-			else
-				window.requestAnimationFrame(that.setGraphic.bind(that));
+            else
+                window.requestAnimationFrame(that.setGraphic.bind(that));
         };
         window.requestAnimationFrame(tilt);
     };
     
     Tile.prototype.unspinSVG = function(degrees=90)
     {
-		const that = this;
+        const that = this;
         let angle = 15;
         
-		const g = this.div.querySelector("use");
+        const g = this.div.querySelector("use");
         const tilt = function()
-		{
+        {
             g.setAttributeNS(null, 'transform', `rotate(-${angle} ${Q50},${Q50})`);
             angle += 15;
-            if ( angle < 90 )
+            if ( angle < degrees )
                 window.requestAnimationFrame(tilt);
-			else
-				window.requestAnimationFrame(that.setGraphic.bind(that));
+            else
+                window.requestAnimationFrame(that.setGraphic.bind(that));
         };
         window.requestAnimationFrame(tilt);
     };
@@ -233,25 +235,25 @@ function Tile()
     Tile.prototype.isTileComplete = function()
     {
         if (this.coins & NORTH) 
-		{
+        {
             if ((this.n === null) || !(this.n.coins & SOUTH)) {
                 return false;
             }
         }
         if (this.coins & EAST) 
-		{
+        {
             if ((this.e === null) || !(this.e.coins & WEST)) {
                 return false;
             }
         }
         if (this.coins & WEST) 
-		{
+        {
             if ((this.w === null) || !(this.w.coins & EAST)) {
                 return false;
             }
         }
         if (this.coins & SOUTH)
-		{
+        {
             if ((this.s === null) || !(this.s.coins & NORTH)) {
                 return false;
             }
@@ -331,20 +333,20 @@ function Tile()
     Tile.prototype.handleEvent = function(event)
     {
         if ( event.type != "click" )
-		{
-			console.log(event);
+        {
+            console.log(event);
             return;
-		}
+        }
         
         if ( this.isGridComplete() )
-			return;
-		
-		if ( event.altKey )
-		{
-			this.coins = this.originalCoins;
-			this.setGraphic();
-		}
-		else if ( event.shiftKey || event.ctrlKey )
+            return;
+        
+        if ( event.altKey )
+        {
+            this.coins = this.originalCoins;
+            this.setGraphic();
+        }
+        else if ( event.shiftKey || event.ctrlKey )
             this.unrotate();
         else
             this.rotate();
@@ -354,17 +356,17 @@ function Tile()
             const it = this.createIterator();
             window.setTimeout( () => {
                 for ( const t of it )
-					t.strokeItBlack(COMPLETED_COLOR);
+                    t.strokeItBlack(COMPLETED_COLOR);
             }, 500);
         }
     };
-	
-	Tile.prototype.strokeItBlack = function(strokeColor=COMPLETED_COLOR)
-	{
-		const ele = this.div.querySelector("svg");
-		if ( ele )
-			ele.setAttributeNS(null, 'stroke', strokeColor);
-	};
+    
+    Tile.prototype.strokeItBlack = function(strokeColor=COMPLETED_COLOR)
+    {
+        const ele = this.div.querySelector("svg");
+        if ( ele )
+            ele.setAttributeNS(null, 'stroke', strokeColor);
+    };
     
     Tile.prototype.setGraphic = function()
     {
@@ -372,18 +374,18 @@ function Tile()
             return;
         
         let svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-        svg.setAttributeNS(null, 'width', Q);
-        svg.setAttributeNS(null, 'height', Q);
-		svg.setAttributeNS(null, 'stroke', INPROGRESS_COLOR);
-		svg.setAttributeNS(null, 'stroke-width', Q10);
-		svg.setAttributeNS(null, 'fill', 'none');
-		
+        svg.setAttributeNS(null, 'width', strQ);
+        svg.setAttributeNS(null, 'height', strQ);
+        svg.setAttributeNS(null, 'stroke', INPROGRESS_COLOR);
+        svg.setAttributeNS(null, 'stroke-width', strQ10);
+        svg.setAttributeNS(null, 'fill', 'none');
+        
         this.div.addEventListener("click", this);
 
-		let u = document.createElementNS(SVG_NAMESPACE, 'use');
-		u.setAttributeNS(null, 'href', `#tile${this.coins}`);
-		svg.appendChild(u);
-		
+        let u = document.createElementNS(SVG_NAMESPACE, 'use');
+        u.setAttributeNS(null, 'href', `#tile${this.coins}`);
+        svg.appendChild(u);
+        
         while ( this.div.lastChild )
             this.div.removeChild(this.div.lastChild);
         this.div.appendChild(svg);
@@ -490,7 +492,7 @@ function GridOfTiles(numX=7, numY=5)
             
             x1 = x1.w;
         }
-		
+        
         return this;
     };
 
@@ -498,35 +500,35 @@ function GridOfTiles(numX=7, numY=5)
     {
         const it = this.createIterator();
         for ( const t of it )
-		{
-			t.originalCoins = t.coins;
+        {
+            t.originalCoins = t.coins;
             t.jumbleCoin();
-		}
+        }
         
         return this;
     };
 
     GridOfTiles.prototype.createHTML = function()
     {
-		const hlp = new SvgHelper();
-		
-		const eleSymbols = document.createElement("div");
-		eleSymbols.setAttribute('display', 'none');
-		for ( let i=0; i<hlp.fun.length; i++ )
-		{
-			const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
-			svg.setAttributeNS(null, 'display', 'none');
-			eleSymbols.appendChild(svg);
-			
-			const sym = document.createElementNS(SVG_NAMESPACE, 'symbol');
-			sym.setAttributeNS(null, 'id', `tile${i}`);
-			svg.appendChild(sym);
-			
-			const g = document.createElementNS(SVG_NAMESPACE, 'g');
-			hlp.fun[i](g);
-			sym.appendChild(g);
-		}
-		document.body.appendChild(eleSymbols);
+        const hlp = new SvgHelper();
+        
+        const eleSymbols = document.createElement("div");
+        eleSymbols.setAttribute('display', 'none');
+        for ( let i=0; i<hlp.fun.length; i++ )
+        {
+            const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+            svg.setAttributeNS(null, 'display', 'none');
+            eleSymbols.appendChild(svg);
+            
+            const sym = document.createElementNS(SVG_NAMESPACE, 'symbol');
+            sym.setAttributeNS(null, 'id', `tile${i}`);
+            svg.appendChild(sym);
+            
+            const g = document.createElementNS(SVG_NAMESPACE, 'g');
+            hlp.fun[i](g);
+            sym.appendChild(g);
+        }
+        document.body.appendChild(eleSymbols);
 
         // create a grid container; all direct children will become grid items
         const eleWrapper = document.createElement("div");
