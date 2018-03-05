@@ -18,7 +18,7 @@ const EAST  = 0b0010;
 const SOUTH = 0b0100;
 const WEST  = 0b1000;
 
-const PLACE_COIN_CHANCE = 0.33;
+const PLACE_COIN_CHANCE = 0.66;
 const JUMBLE_COIN_CHANCE = 0.8;
 
 // https://en.wikipedia.org/wiki/Web_colors
@@ -71,6 +71,7 @@ class SvgHelper
 
     static empty(g)
     {
+        void g;         // ESLint warns about unused variables
     }
     static singleN(g)
     {
@@ -156,7 +157,7 @@ function Tile()
     {
         const g = this.div.querySelector('use');
 
-        return new Promise(function(resolve, reject)
+        return new Promise(function(resolve /*, reject*/)
         {
             let angle = 10;
 
@@ -279,36 +280,15 @@ function Tile()
         }
     };
 
-    Tile.prototype.strokeItBlack = function(strokeColor = COMPLETED_COLOR)
+    Tile.prototype.strokeItBlack = function()
     {
         const ele = this.div.querySelector('svg');
         if ( ele )
-            ele.setAttributeNS(null, 'stroke', strokeColor);
+            ele.setAttributeNS(null, 'stroke', COMPLETED_COLOR);
     };
 
     Tile.prototype.toggle = function(x,y)
     {
-        const pointInTriangle = function(px,py,ax,ay,bx,by,cx,cy)
-        {   // http://www.blackpawn.com/texts/pointinpoly/default.html and https://koozdra.wordpress.com/2012/06/27/javascript-is-point-in-triangle/
-            
-            const v0 = [cx-ax,cy-ay];
-            const v1 = [bx-ax,by-ay];
-            const v2 = [px-ax,py-ay];
-            
-            const dot00 = (v0[0]*v0[0]) + (v0[1]*v0[1]);
-            const dot01 = (v0[0]*v1[0]) + (v0[1]*v1[1]);
-            const dot02 = (v0[0]*v2[0]) + (v0[1]*v2[1]);
-            const dot11 = (v1[0]*v1[0]) + (v1[1]*v1[1]);
-            const dot12 = (v1[0]*v2[0]) + (v1[1]*v2[1]);
-            
-            const invDenom = 1/ (dot00 * dot11 - dot01 * dot01);
-            
-            const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-            
-            return ((u >= 0) && (v >= 0) && (u + v < 1));
-        };
-
         const toggleBit = function(t, tOpp, bit, oppBit)
         {
             if ( null == tOpp )
@@ -329,13 +309,13 @@ function Tile()
             tOpp.setGraphic();
         };
     
-        if ( pointInTriangle(x,y, 0,0, Q,0, Q50, Q50) )
+        if ( Util.pointInTriangle(x,y, 0,0, Q,0, Q50, Q50) )
             toggleBit(this, this.n, NORTH, SOUTH);
-        else if ( pointInTriangle(x,y, Q,0, Q,Q, Q50, Q50) )
+        else if ( Util.pointInTriangle(x,y, Q,0, Q,Q, Q50, Q50) )
             toggleBit(this, this.e, EAST, WEST);
-        else if ( pointInTriangle(x, y, 0,Q, Q,Q, Q50, Q50) )
+        else if ( Util.pointInTriangle(x, y, 0,Q, Q,Q, Q50, Q50) )
             toggleBit(this, this.s, SOUTH, NORTH);
-        else if ( pointInTriangle(x, y, 0,0, 0,Q, Q50, Q50) )
+        else if ( Util.pointInTriangle(x, y, 0,0, 0,Q, Q50, Q50) )
             toggleBit(this, this.w, WEST, EAST);
     };
 
@@ -361,7 +341,7 @@ function Tile()
             if ( this.isGridComplete() )
             {
                 for ( const t of this.createIterator() )
-                    t.strokeItBlack(COMPLETED_COLOR);
+                    t.strokeItBlack();
                 // document.querySelector returns an Element, not an HTMLElement
                 //@ts-ignore property 'style' does not exist on type 'Element'
                 document.querySelector('div.gridoftiles').style.borderColor = COMPLETED_COLOR;
@@ -600,7 +580,7 @@ function GridOfTiles(numX = 7, numY = 5)
             }
         }
     };
-
+ 
     GridOfTiles.prototype.handleEventKeyDown = function(event)
     {   // 'event' is a KeyboardEvent object, event.type == "keydown"
         if ( event.code == 'KeyB' )
@@ -624,12 +604,14 @@ function GridOfTiles(numX = 7, numY = 5)
                 arrCoins.push(t.coins);
             
             var obj = {
+                id: Util.BSD16(arrCoins, this.numX + (this.numY * 256)),
                 type: '4',
                 numX: this.numX,
                 numY: this.numY,
                 coins: arrCoins
             };
             console.log(JSON.stringify(obj));
+            Util.saveLoop(obj);
         }
 
         if ( event.code == 'KeyU')
@@ -643,26 +625,24 @@ function GridOfTiles(numX = 7, numY = 5)
 
 function main()
 {
-    var urlParams = {},
-        match,
-        pl     = /\+/g,  // Regex for replacing addition symbol with a space
-        search = /([^&=]+)=?([^&]*)/g,
-        decode = (s) => decodeURIComponent(s.replace(pl, ' ')),
-        query  = window.location.search.substring(1);
-
-    while (match = search.exec(query))
-        urlParams[decode(match[1])] = decode(match[2]);
+    const urlParams = Util.getCommandLine();
 
     DEBUGGING = urlParams.debug ? urlParams.debug : false;
     DESIGNING = urlParams.design ? urlParams.design : false;
-    let numX = urlParams.x ? urlParams.x : Math.max(Math.floor(window.innerWidth / Q), 5);
-    let numY = urlParams.y ? urlParams.y : Math.max(Math.floor(window.innerHeight / Q), 5);
+    let numX = urlParams.x ? urlParams.x : Math.max(Math.floor(window.innerWidth / Q) - 1, 5);
+    let numY = urlParams.y ? urlParams.y : Math.max(Math.floor(window.innerHeight / Q) - 1, 5);
 
-    if ( urlParams.load && prebuilt[urlParams.load] )
+    if ( urlParams.load )
     {
-        const objLoad = JSON.parse(prebuilt[urlParams.load]);
-        const got = new GridOfTiles(objLoad.numX, objLoad.numY);
-        got.createHTML().placeCoins(objLoad.coins).jumbleCoins().setGraphics();
+        fetch('http://localhost:3000/loops?type=4') // returns a Promise that resolves to a Response object
+        .then( resolve => resolve.json(), reject => console.error(reject) )
+        .then( arrLoops =>
+        {
+            const objLoad = arrLoops[Math.floor(Math.random()*arrLoops.length)];
+            const got = new GridOfTiles(objLoad.numX, objLoad.numY);
+            got.createHTML().placeCoins(objLoad.coins).jumbleCoins().setGraphics();
+        }, reject => console.error(reject))
+        .catch(err => console.error(err));
     }
     else
     {
